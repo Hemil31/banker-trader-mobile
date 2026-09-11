@@ -6,6 +6,7 @@ import 'features/authentication/presentation/pages/login_page.dart';
 import 'features/authentication/presentation/state/auth_cubit.dart';
 import 'features/authentication/presentation/state/auth_state.dart';
 import 'features/broker/presentation/state/broker_cubit.dart';
+import 'features/news/presentation/state/news_cubit.dart';
 import 'features/trading/presentation/pages/trading_home_page.dart';
 import 'features/trading/presentation/state/trading_cubit.dart';
 
@@ -21,6 +22,7 @@ class BankerTraderApp extends StatelessWidget {
         ),
         BlocProvider<TradingCubit>(create: (_) => locator<TradingCubit>()),
         BlocProvider<BrokerCubit>(create: (_) => locator<BrokerCubit>()),
+        BlocProvider<NewsCubit>(create: (_) => locator<NewsCubit>()),
       ],
       child: MaterialApp(
         title: 'BankerTrader',

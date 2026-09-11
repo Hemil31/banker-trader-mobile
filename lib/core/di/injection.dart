@@ -27,6 +27,11 @@ import '../../features/broker/domain/usecases/fetch_broker_accounts_usecase.dart
 import '../../features/broker/domain/usecases/fetch_brokers_usecase.dart';
 import '../../features/broker/domain/usecases/open_broker_authorization_usecase.dart';
 import '../../features/broker/presentation/state/broker_cubit.dart';
+import '../../features/news/data/repositories/news_repository_impl.dart';
+import '../../features/news/data/sources/news_api.dart';
+import '../../features/news/domain/repositories/news_repository.dart';
+import '../../features/news/domain/usecases/fetch_news_usecase.dart';
+import '../../features/news/presentation/state/news_cubit.dart';
 
 final GetIt locator = GetIt.instance;
 
@@ -128,4 +133,17 @@ void configureDependencies() {
         disconnectBroker: locator<DisconnectBrokerUseCase>(),
       ),
     );
+
+  final newsApi = NewsApi(dio: dio, baseUrl: baseUrl);
+
+  locator
+    // News
+    ..registerSingleton<NewsApi>(newsApi)
+    ..registerLazySingleton<NewsRepository>(
+      () => NewsRepositoryImpl(api: newsApi),
+    )
+    ..registerFactory(
+      () => FetchNewsUseCase(repository: locator<NewsRepository>()),
+    )
+    ..registerFactory(() => NewsCubit(fetchNews: locator<FetchNewsUseCase>()));
 }

@@ -21,6 +21,10 @@ import 'package:banker_trader/features/broker/domain/usecases/fetch_brokers_usec
 import 'package:banker_trader/features/broker/domain/usecases/open_broker_authorization_usecase.dart';
 import 'package:banker_trader/features/broker/presentation/state/broker_cubit.dart';
 import 'package:banker_trader/features/broker/presentation/state/broker_state.dart';
+import 'package:banker_trader/features/news/domain/entities/news_article.dart';
+import 'package:banker_trader/features/news/domain/repositories/news_repository.dart';
+import 'package:banker_trader/features/news/domain/usecases/fetch_news_usecase.dart';
+import 'package:banker_trader/features/news/presentation/state/news_cubit.dart';
 import 'package:banker_trader/features/trading/domain/entities/account.dart';
 import 'package:banker_trader/features/trading/domain/entities/config_row.dart';
 import 'package:banker_trader/features/trading/domain/entities/portfolio_overview.dart';
@@ -154,6 +158,30 @@ class _FakeTradingRepository implements TradingRepository {
       );
 }
 
+class _FakeNewsRepository implements NewsRepository {
+  @override
+  Future<List<NewsArticle>> fetchNews({String? symbol}) async => const [
+    NewsArticle(
+      id: 'n1',
+      symbol: 'SBIN',
+      title: 'SBIN surges to record high',
+      publisher: 'Reuters',
+      sentiment: 'positive',
+      sentimentScore: 90,
+      originalUrl: null,
+    ),
+    NewsArticle(
+      id: 'n2',
+      symbol: 'RELIANCE',
+      title: 'Reliance drops on probe',
+      publisher: 'Bloomberg',
+      sentiment: 'negative',
+      sentimentScore: 10,
+      originalUrl: null,
+    ),
+  ];
+}
+
 Widget _buildApp() {
   final authRepo = _FakeAuthRepository();
   final brokerRepo = _FakeBrokerRepository();
@@ -198,18 +226,23 @@ Widget _buildApp() {
     runPaperSession: RunPaperSessionUseCase(repository: tradingRepo),
   );
 
+  final newsCubit = NewsCubit(
+    fetchNews: FetchNewsUseCase(repository: _FakeNewsRepository()),
+  );
+
   return MultiBlocProvider(
     providers: [
       BlocProvider<AuthCubit>.value(value: authCubit),
       BlocProvider<BrokerCubit>.value(value: brokerCubit),
       BlocProvider<TradingCubit>.value(value: tradingCubit),
+      BlocProvider<NewsCubit>.value(value: newsCubit),
     ],
     child: const MaterialApp(home: TradingHomePage()),
   );
 }
 
 void main() {
-  testWidgets('shell shows bottom navigation with five destinations', (
+  testWidgets('shell shows bottom navigation with six destinations', (
     tester,
   ) async {
     await tester.pumpWidget(_buildApp());
@@ -217,11 +250,27 @@ void main() {
 
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.text('Home'), findsWidgets);
+    expect(find.text('News'), findsOneWidget);
     expect(find.text('Signals'), findsOneWidget);
     expect(find.text('Trades'), findsOneWidget);
     expect(find.text('Config'), findsOneWidget);
     expect(find.text('Profile'), findsOneWidget);
     expect(find.text('Net equity'), findsOneWidget);
+  });
+
+  testWidgets('news tab shows the latest headlines with sentiment', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('News'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('SBIN surges to record high'), findsOneWidget);
+    expect(find.text('Reliance drops on probe'), findsOneWidget);
+    expect(find.text('positive'), findsOneWidget);
+    expect(find.text('negative'), findsOneWidget);
   });
 
   testWidgets('profile tab shows user info, accounts and broker credentials', (

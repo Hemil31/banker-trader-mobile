@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../broker/presentation/state/broker_cubit.dart';
+import '../../../news/presentation/pages/news_tab.dart';
+import '../../../news/presentation/state/news_cubit.dart';
 import '../../../profile/presentation/pages/profile_tab.dart';
 import '../state/trading_cubit.dart';
 import '../state/trading_state.dart';
@@ -12,7 +14,7 @@ import 'paper_trades_tab.dart';
 import 'signals_tab.dart';
 
 /// Authenticated shell with bottom-tab navigation:
-/// Home (overview), Signals, Paper trades, Config and Profile.
+/// Home (overview), News, Signals, Paper trades, Config and Profile.
 class TradingHomePage extends StatefulWidget {
   const TradingHomePage({super.key});
 
@@ -25,6 +27,7 @@ class _TradingHomePageState extends State<TradingHomePage> {
 
   static const _titles = [
     'Home',
+    'News',
     'Signals',
     'Paper trades',
     'Config',
@@ -44,9 +47,11 @@ class _TradingHomePageState extends State<TradingHomePage> {
 
   void _selectTab(int index) {
     setState(() => _index = index);
-    if (index == 3) {
-      context.read<TradingCubit>().load(withConfig: true);
+    if (index == 1) {
+      context.read<NewsCubit>().load();
     } else if (index == 4) {
+      context.read<TradingCubit>().load(withConfig: true);
+    } else if (index == 5) {
       context.read<BrokerCubit>().load();
     }
   }
@@ -102,6 +107,9 @@ class _TradingHomePageState extends State<TradingHomePage> {
                   state: state,
                   onRefresh: () => context.read<TradingCubit>().load(),
                 ),
+                NewsTab(
+                  onRefresh: () => context.read<NewsCubit>().load(),
+                ),
                 SignalsTab(
                   signals: state.overview.recentSignals,
                   onRefresh: () => context.read<TradingCubit>().load(),
@@ -129,6 +137,11 @@ class _TradingHomePageState extends State<TradingHomePage> {
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
             label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.newspaper_outlined),
+            selectedIcon: Icon(Icons.newspaper),
+            label: 'News',
           ),
           NavigationDestination(
             icon: Icon(Icons.query_stats_outlined),
