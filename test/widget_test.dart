@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:banker_trader/features/authentication/domain/entities/auth_tokens.dart';
 import 'package:banker_trader/features/authentication/domain/entities/user.dart';
 import 'package:banker_trader/features/authentication/domain/repositories/authentication_repository.dart';
+import 'package:banker_trader/features/authentication/domain/usecases/change_password_usecase.dart';
 import 'package:banker_trader/features/authentication/domain/usecases/get_current_user_usecase.dart';
 import 'package:banker_trader/features/authentication/domain/usecases/login_usecase.dart';
 import 'package:banker_trader/features/authentication/domain/usecases/logout_usecase.dart';
@@ -35,6 +36,12 @@ class _FakeRepository implements AuthenticationRepository {
   Future<void> logout() async {}
 
   @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {}
+
+  @override
   Future<User> me() async => const User(
     id: '1',
     name: 'Tester',
@@ -49,6 +56,7 @@ AuthCubit _buildCubit() {
     loginUseCase: LoginUseCase(repo),
     logoutUseCase: LogoutUseCase(repo),
     getCurrentUserUseCase: GetCurrentUserUseCase(repo),
+    changePasswordUseCase: ChangePasswordUseCase(repository: repo),
   );
 }
 

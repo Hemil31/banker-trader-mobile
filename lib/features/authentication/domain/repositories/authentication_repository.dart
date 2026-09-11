@@ -11,6 +11,12 @@ abstract class AuthenticationRepository {
   /// Revokes the current user session.
   Future<void> logout();
 
+  /// Changes the current user's password. Revokes all other sessions/tokens.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
   /// Returns the currently authenticated user.
   Future<User> me();
 }

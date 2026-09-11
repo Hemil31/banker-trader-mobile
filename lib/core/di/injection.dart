@@ -10,6 +10,7 @@ import '../../features/authentication/domain/repositories/authentication_reposit
 import '../../features/authentication/domain/usecases/get_current_user_usecase.dart';
 import '../../features/authentication/domain/usecases/login_usecase.dart';
 import '../../features/authentication/domain/usecases/logout_usecase.dart';
+import '../../features/authentication/domain/usecases/change_password_usecase.dart';
 import '../../features/authentication/presentation/state/auth_cubit.dart';
 import '../../features/trading/data/repositories/trading_repository_impl.dart';
 import '../../features/trading/data/sources/trading_api.dart';
@@ -59,10 +60,16 @@ void configureDependencies() {
       () => GetCurrentUserUseCase(locator<AuthenticationRepository>()),
     )
     ..registerFactory(
+      () => ChangePasswordUseCase(
+        repository: locator<AuthenticationRepository>(),
+      ),
+    )
+    ..registerFactory(
       () => AuthCubit(
         loginUseCase: locator<LoginUseCase>(),
         logoutUseCase: locator<LogoutUseCase>(),
         getCurrentUserUseCase: locator<GetCurrentUserUseCase>(),
+        changePasswordUseCase: locator<ChangePasswordUseCase>(),
       ),
     );
 

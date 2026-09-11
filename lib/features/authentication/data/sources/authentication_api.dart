@@ -83,6 +83,20 @@ class AuthenticationApi {
     await dio.post('$baseUrl/api/logout');
   }
 
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await dio.post(
+      '$baseUrl/api/change-password',
+      data: {
+        'current_password': currentPassword,
+        'new_password': newPassword,
+      },
+      options: Options(contentType: Headers.jsonContentType),
+    );
+  }
+
   Future<Map<String, dynamic>> me() async {
     final response = await dio.get('$baseUrl/api/me');
     final data = response.data as Map<String, dynamic>? ?? const {};
