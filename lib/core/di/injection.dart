@@ -18,6 +18,7 @@ import '../../features/trading/domain/repositories/trading_repository.dart';
 import '../../features/trading/domain/usecases/fetch_config_usecase.dart';
 import '../../features/trading/domain/usecases/fetch_portfolio_usecase.dart';
 import '../../features/trading/domain/usecases/run_paper_session_usecase.dart';
+import '../../features/trading/domain/usecases/update_config_usecase.dart';
 import '../../features/trading/presentation/state/trading_cubit.dart';
 import '../../features/broker/data/repositories/broker_repository_impl.dart';
 import '../../features/broker/data/sources/broker_api.dart';
@@ -97,10 +98,14 @@ void configureDependencies() {
       () => RunPaperSessionUseCase(repository: locator<TradingRepository>()),
     )
     ..registerFactory(
+      () => UpdateConfigUseCase(repository: locator<TradingRepository>()),
+    )
+    ..registerFactory(
       () => TradingCubit(
         fetchPortfolio: locator<FetchPortfolioUseCase>(),
         fetchConfig: locator<FetchConfigUseCase>(),
         runPaperSession: locator<RunPaperSessionUseCase>(),
+        updateConfig: locator<UpdateConfigUseCase>(),
       ),
     );
 

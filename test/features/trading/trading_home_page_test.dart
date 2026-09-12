@@ -34,6 +34,7 @@ import 'package:banker_trader/features/trading/domain/repositories/trading_repos
 import 'package:banker_trader/features/trading/domain/usecases/fetch_config_usecase.dart';
 import 'package:banker_trader/features/trading/domain/usecases/fetch_portfolio_usecase.dart';
 import 'package:banker_trader/features/trading/domain/usecases/run_paper_session_usecase.dart';
+import 'package:banker_trader/features/trading/domain/usecases/update_config_usecase.dart';
 import 'package:banker_trader/features/trading/presentation/pages/trading_home_page.dart';
 import 'package:banker_trader/features/trading/presentation/state/trading_cubit.dart';
 
@@ -166,6 +167,9 @@ class _FakeTradingRepository implements TradingRepository {
         monitored: 0,
         exits: 0,
       );
+
+  @override
+  Future<Object?> updateConfig(String key, Object value) async => value;
 }
 
 class _FakeNewsRepository implements NewsRepository {
@@ -235,6 +239,7 @@ Widget _buildApp() {
     fetchPortfolio: FetchPortfolioUseCase(repository: tradingRepo),
     fetchConfig: FetchConfigUseCase(repository: tradingRepo),
     runPaperSession: RunPaperSessionUseCase(repository: tradingRepo),
+    updateConfig: UpdateConfigUseCase(repository: tradingRepo),
   );
 
   final newsCubit = NewsCubit(

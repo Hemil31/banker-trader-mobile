@@ -129,7 +129,7 @@ class _TradingHomePageState extends State<TradingHomePage> {
                   onRefresh: () => context.read<TradingCubit>().load(),
                 ),
                 ConfigTab(
-                  rows: state.config,
+                  state: state,
                   onRefresh: () =>
                       context.read<TradingCubit>().load(withConfig: true),
                 ),

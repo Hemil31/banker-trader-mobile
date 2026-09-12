@@ -25,4 +25,15 @@ class ConfigRow {
       isEditable: json['is_editable'] as bool? ?? false,
     );
   }
+
+  /// Returns a copy with [value] replaced — used after a successful
+  /// `updateConfig` call to refresh just that row in place.
+  ConfigRow copyWith({Object? value}) => ConfigRow(
+    key: key,
+    group: group,
+    type: type,
+    value: value ?? this.value,
+    label: label,
+    isEditable: isEditable,
+  );
 }

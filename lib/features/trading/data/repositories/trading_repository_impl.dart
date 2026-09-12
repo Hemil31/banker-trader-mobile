@@ -19,4 +19,8 @@ class TradingRepositoryImpl implements TradingRepository {
     final data = await api.runPaperSession(symbols: symbols);
     return PaperRunResult.fromJson(data);
   }
+
+  @override
+  Future<Object?> updateConfig(String key, Object value) =>
+      api.updateConfig(key, value);
 }

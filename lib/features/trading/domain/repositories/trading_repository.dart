@@ -37,6 +37,8 @@ abstract interface class TradingRepository {
   Future<List<ConfigRow>> fetchConfig();
 
   Future<PaperRunResult> runPaperSession({List<int>? symbols});
+
+  Future<Object?> updateConfig(String key, Object value);
 }
 
 int _i(Object? value) {

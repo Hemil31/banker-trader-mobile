@@ -33,6 +33,17 @@ class TradingApi {
     );
     return _data(response.data);
   }
+
+  /// Updates a single editable config row. Returns the coerced value the
+  /// backend stored, so the caller can refresh just that row.
+  Future<Object?> updateConfig(String key, Object value) async {
+    final response = await dio.patch(
+      '$baseUrl/api/trading/config',
+      data: {'key': key, 'value': value},
+      options: Options(contentType: Headers.jsonContentType),
+    );
+    return _data(response.data)['value'];
+  }
 }
 
 Map<String, dynamic> _data(Object? body) {
