@@ -57,6 +57,44 @@ class _SplashPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Size-check first, then draw the wordmark: scale to fill ~86% of
+            // the available width while keeping the asset's aspect ratio, so
+            // it covers every screen size consistently.
+            final imageWidth = (constraints.maxWidth * 0.86).clamp(280.0, 460.0);
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/images/splash.png',
+                    width: imageWidth,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => Icon(
+                      Icons.trending_up_rounded,
+                      color: AppColors.accent,
+                      size: 48,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpace.xxl),
+                  const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: AppColors.accent,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 }

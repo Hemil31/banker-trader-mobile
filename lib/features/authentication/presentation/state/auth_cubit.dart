@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/exceptions/auth_exception.dart';
 import '../../domain/usecases/change_password_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
@@ -28,8 +29,12 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final user = await _login(identifier, password);
       emit(AuthAuthenticated(user));
-    } catch (e) {
-      emit(AuthError('Login failed. Please check your credentials.'));
+    } on AuthException catch (e) {
+      emit(AuthError(e.message, e.fieldErrors));
+    } catch (_) {
+      emit(const AuthError(
+        'Unable to reach the server. Check your connection and try again.',
+      ));
     }
   }
 

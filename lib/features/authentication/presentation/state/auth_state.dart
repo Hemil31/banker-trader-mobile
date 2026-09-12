@@ -23,7 +23,11 @@ class AuthUnauthenticated extends AuthState {
 }
 
 class AuthError extends AuthState {
-  const AuthError(this.message);
+  const AuthError(this.message, [this.fieldErrors = const {}]);
 
   final String message;
+
+  /// Backend validation errors keyed by field (`email`, `password`), used to
+  /// render inline messages on the login form.
+  final Map<String, String> fieldErrors;
 }

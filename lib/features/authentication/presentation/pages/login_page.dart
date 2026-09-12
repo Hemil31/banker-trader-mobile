@@ -17,6 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   final _identifierController = TextEditingController(text: 'dev');
   final _passwordController = TextEditingController(text: 'devpassword');
   bool _obscurePassword = true;
+  Map<String, String> _fieldErrors = const {};
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
+    setState(() => _fieldErrors = const {});
     context.read<AuthCubit>().login(
       _identifierController.text.trim(),
       _passwordController.text,
@@ -46,10 +48,15 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state is AuthError) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text(state.message)));
+        if (state is AuthLoading) {
+          setState(() => _fieldErrors = const {});
+        } else if (state is AuthError) {
+          setState(() => _fieldErrors = state.fieldErrors);
+          if (state.fieldErrors.isEmpty) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(state.message)));
+          }
         }
       },
       builder: (context, state) {
@@ -70,9 +77,10 @@ class _LoginPageState extends State<LoginPage> {
                       TextFormField(
                         controller: _identifierController,
                         autofillHints: const [AutofillHints.username],
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Email or username',
-                          prefixIcon: Icon(Icons.person_outline),
+                          prefixIcon: const Icon(Icons.person_outline),
+                          errorText: _fieldErrors['email'] ?? _fieldErrors['identifier'],
                         ),
                         validator: (value) =>
                             value == null || value.trim().isEmpty
@@ -88,6 +96,7 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           labelText: 'Password',
                           prefixIcon: const Icon(Icons.lock_outline),
+                          errorText: _fieldErrors['password'],
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword

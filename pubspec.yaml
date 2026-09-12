@@ -66,23 +66,25 @@ flutter_native_splash:
   image_dark: assets/images/splash.png
   android_12:
     color: "#F3F1EC"
-    image: assets/images/splash.png
+    image: assets/images/logo.png
+    icon_background_color: "#F3F1EC"
     color_dark: "#F3F1EC"
-    image_dark: assets/images/splash.png
+    image_dark: assets/images/logo.png
+    icon_background_color_dark: "#F3F1EC"
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: false
   image_path: assets/images/logo.png
   min_sdk_android: 21
-  adaptive_icon_background: "#0D1B2A"
+  adaptive_icon_background: "#F3F1EC"
   adaptive_icon_foreground: assets/images/logo.png
   adaptive_icon_foreground_inset: 20
   web:
     generate: true
     image_path: assets/images/logo.png
-    background_color: "#0D1B2A"
-    theme_color: "#0D1B2A"
+    background_color: "#F3F1EC"
+    theme_color: "#F3F1EC"
 
 # The following section is specific to Flutter packages.
 flutter:
