@@ -24,6 +24,7 @@ import '../../features/broker/data/repositories/broker_repository_impl.dart';
 import '../../features/broker/data/sources/broker_api.dart';
 import '../../features/broker/domain/repositories/broker_repository.dart';
 import '../../features/broker/domain/usecases/connect_kotak_usecase.dart';
+import '../../features/broker/domain/usecases/connect_megabull_usecase.dart';
 import '../../features/broker/domain/usecases/disconnect_broker_usecase.dart';
 import '../../features/broker/domain/usecases/fetch_broker_accounts_usecase.dart';
 import '../../features/broker/domain/usecases/fetch_brokers_usecase.dart';
@@ -135,12 +136,16 @@ void configureDependencies() {
       () => ConnectKotakUseCase(repository: locator<BrokerRepository>()),
     )
     ..registerFactory(
+      () => ConnectMegaBullUseCase(repository: locator<BrokerRepository>()),
+    )
+    ..registerFactory(
       () => BrokerCubit(
         fetchBrokers: locator<FetchBrokersUseCase>(),
         fetchAccounts: locator<FetchBrokerAccountsUseCase>(),
         openAuthorization: locator<OpenBrokerAuthorizationUseCase>(),
         disconnectBroker: locator<DisconnectBrokerUseCase>(),
         connectKotak: locator<ConnectKotakUseCase>(),
+        connectMegaBull: locator<ConnectMegaBullUseCase>(),
       ),
     );
 

@@ -47,4 +47,8 @@ class BrokerRepositoryImpl implements BrokerRepository {
     totp: totp,
     mpin: mpin,
   );
+
+  @override
+  Future<void> connectMegaBull(String tradingAccountId, {required String apiKey}) =>
+      _api.megaBullConnect(tradingAccountId, apiKey: apiKey);
 }

@@ -26,4 +26,8 @@ abstract class BrokerRepository {
     required String totp,
     required String mpin,
   });
+
+  /// Connects a MegaBull paper-trading account with the user's own api-key
+  /// (no OAuth redirect — MegaBull authenticates every request via header).
+  Future<void> connectMegaBull(String tradingAccountId, {required String apiKey});
 }

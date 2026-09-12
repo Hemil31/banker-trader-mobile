@@ -143,9 +143,12 @@ class _BrokerConnectPageState extends State<BrokerConnectPage> {
     });
 
     // Paper always listed first, so switching back to it is just another
-    // dropdown option rather than a separate disconnect control.
+    // dropdown option rather than a separate disconnect control. Other paper
+    // *providers* (MegaBull, ...) sit right after it — they still trade
+    // virtual money, but need their own credentials like a live broker does.
     final connectableBrokers = [
       ...state.brokers.where((b) => b.slug == 'paper' && b.active),
+      ...state.brokers.where((b) => b.paper && b.slug != 'paper' && b.active),
       ...state.brokers.where((b) => b.isLive),
     ];
 
@@ -300,6 +303,8 @@ class _AccountCardState extends State<_AccountCard> {
                 )
               else if (_selectedSlug == 'kotak')
                 _KotakConnectForm(tradingAccountId: widget.account.id)
+              else if (_selectedSlug == 'megabull')
+                _MegaBullConnectForm(tradingAccountId: widget.account.id)
               else if (_selectedSlug == 'paper')
                 FilledButton.icon(
                   icon: const Icon(Icons.link_off, size: 18),
@@ -504,6 +509,117 @@ class _KotakConnectFormState extends State<_KotakConnectForm> {
                     ),
                   )
                 : const Text('Verify & connect Kotak'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// MegaBull authenticates with a single personal api-key (generated from the
+/// user's MegaBull profile) instead of an OAuth redirect. It still trades
+/// virtual money — the account stays in paper mode once connected.
+class _MegaBullConnectForm extends StatefulWidget {
+  const _MegaBullConnectForm({required this.tradingAccountId});
+
+  final String tradingAccountId;
+
+  @override
+  State<_MegaBullConnectForm> createState() => _MegaBullConnectFormState();
+}
+
+class _MegaBullConnectFormState extends State<_MegaBullConnectForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _apiKeyController = TextEditingController();
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _apiKeyController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await context.read<BrokerCubit>().connectMegaBull(
+        widget.tradingAccountId,
+        apiKey: _apiKeyController.text.trim(),
+      );
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => _error = error.toString().replaceFirst('Exception: ', ''),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _busy = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: AppSpace.lg),
+          Text(
+            'MEGABULL API KEY',
+            style: AppFonts.body(
+              size: 11,
+              weight: FontWeight.w700,
+              color: AppColors.textMuted,
+            ).copyWith(letterSpacing: 0.5),
+          ),
+          const SizedBox(height: AppSpace.xs),
+          Text(
+            'Generate this from your MegaBull profile at trade.megabull.in. '
+            'Keys expire after 1 month and can be regenerated there.',
+            style: AppFonts.body(size: 11.5, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: AppSpace.sm),
+          TextFormField(
+            controller: _apiKeyController,
+            obscureText: true,
+            decoration: const InputDecoration(
+              labelText: 'API key',
+              isDense: true,
+            ),
+            validator: (v) =>
+                v == null || v.trim().isEmpty ? 'Required' : null,
+          ),
+          if (_error != null) ...[
+            const SizedBox(height: AppSpace.sm),
+            Text(
+              _error!,
+              style: AppFonts.body(size: 12, color: AppColors.negative),
+            ),
+          ],
+          const SizedBox(height: AppSpace.md),
+          FilledButton(
+            onPressed: _busy ? null : _submit,
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(44)),
+            child: _busy
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text('Verify & connect MegaBull'),
           ),
         ],
       ),

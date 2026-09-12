@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/broker.dart';
 import '../../domain/usecases/connect_kotak_usecase.dart';
+import '../../domain/usecases/connect_megabull_usecase.dart';
 import '../../domain/usecases/disconnect_broker_usecase.dart';
 import '../../domain/usecases/fetch_broker_accounts_usecase.dart';
 import '../../domain/usecases/fetch_brokers_usecase.dart';
@@ -19,11 +20,13 @@ class BrokerCubit extends Cubit<BrokerState> {
     required OpenBrokerAuthorizationUseCase openAuthorization,
     required DisconnectBrokerUseCase disconnectBroker,
     required ConnectKotakUseCase connectKotak,
+    required ConnectMegaBullUseCase connectMegaBull,
   }) : _fetchBrokers = fetchBrokers,
        _fetchAccounts = fetchAccounts,
        _openAuthorization = openAuthorization,
        _disconnectBroker = disconnectBroker,
        _connectKotak = connectKotak,
+       _connectMegaBull = connectMegaBull,
        super(const BrokerInitial());
 
   final FetchBrokersUseCase _fetchBrokers;
@@ -31,6 +34,7 @@ class BrokerCubit extends Cubit<BrokerState> {
   final OpenBrokerAuthorizationUseCase _openAuthorization;
   final DisconnectBrokerUseCase _disconnectBroker;
   final ConnectKotakUseCase _connectKotak;
+  final ConnectMegaBullUseCase _connectMegaBull;
 
   Future<void> load() async {
     emit(const BrokerLoading());
@@ -94,6 +98,18 @@ class BrokerCubit extends Cubit<BrokerState> {
       throw Exception(_message(error));
     }
     await _refreshAccounts('Kotak connected successfully.');
+  }
+
+  /// Connects a MegaBull paper-trading account with the user's own api-key.
+  /// Rethrows a clean message on failure (bad/expired key) so the form can
+  /// show it inline and let the user retry.
+  Future<void> connectMegaBull(String tradingAccountId, {required String apiKey}) async {
+    try {
+      await _connectMegaBull(tradingAccountId, apiKey: apiKey);
+    } catch (error) {
+      throw Exception(_message(error));
+    }
+    await _refreshAccounts('MegaBull connected successfully.');
   }
 
   Future<void> _refreshAccounts([String? message]) async {

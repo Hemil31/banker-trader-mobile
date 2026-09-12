@@ -70,6 +70,15 @@ class BrokerApi {
     );
   }
 
+  /// Connects a MegaBull paper-trading account with the user's own api-key.
+  Future<void> megaBullConnect(String tradingAccountId, {required String apiKey}) async {
+    await dio.post(
+      '$baseUrl/api/broker/connect/$tradingAccountId/megabull',
+      data: {'api_key': apiKey},
+      options: Options(contentType: Headers.jsonContentType),
+    );
+  }
+
   Future<String> authorizeFeed(String tradingAccountId, String type) async {
     final response = await dio.get(
       '$baseUrl/api/broker/feed/$tradingAccountId/$type',

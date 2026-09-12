@@ -16,6 +16,7 @@ import 'package:banker_trader/features/broker/domain/entities/broker_account.dar
 import 'package:banker_trader/features/broker/domain/entities/broker_authorization.dart';
 import 'package:banker_trader/features/broker/domain/repositories/broker_repository.dart';
 import 'package:banker_trader/features/broker/domain/usecases/connect_kotak_usecase.dart';
+import 'package:banker_trader/features/broker/domain/usecases/connect_megabull_usecase.dart';
 import 'package:banker_trader/features/broker/domain/usecases/disconnect_broker_usecase.dart';
 import 'package:banker_trader/features/broker/domain/usecases/fetch_broker_accounts_usecase.dart';
 import 'package:banker_trader/features/broker/domain/usecases/fetch_brokers_usecase.dart';
@@ -127,6 +128,9 @@ class _FakeBrokerRepository implements BrokerRepository {
     required String totp,
     required String mpin,
   }) async {}
+
+  @override
+  Future<void> connectMegaBull(String tradingAccountId, {required String apiKey}) async {}
 }
 
 class _FakeTradingRepository implements TradingRepository {
@@ -218,6 +222,7 @@ Widget _buildApp() {
     openAuthorization: OpenBrokerAuthorizationUseCase(repository: brokerRepo),
     disconnectBroker: DisconnectBrokerUseCase(repository: brokerRepo),
     connectKotak: ConnectKotakUseCase(repository: brokerRepo),
+    connectMegaBull: ConnectMegaBullUseCase(repository: brokerRepo),
   )..emit(
     BrokerLoaded(
       brokers: const [
