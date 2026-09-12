@@ -58,20 +58,20 @@ class _SplashPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // Size-check first, then draw the wordmark: scale to fill ~86% of
-            // the available width while keeping the asset's aspect ratio, so
-            // it covers every screen size consistently.
+            // Size-check first, then draw the splash animation: scale the
+            // 16:9 GIF to fill ~86% of the available width while keeping its
+            // aspect ratio, so it covers every screen size consistently.
             final imageWidth = (constraints.maxWidth * 0.86).clamp(280.0, 460.0);
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Image.asset(
-                    'assets/images/splash.png',
+                    'assets/images/splash.gif',
                     width: imageWidth,
                     fit: BoxFit.contain,
                     errorBuilder: (_, _, _) => Icon(
