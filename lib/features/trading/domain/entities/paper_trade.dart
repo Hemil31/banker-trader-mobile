@@ -13,7 +13,7 @@ class PaperTrade {
     required this.executedAt,
   });
 
-  final int id;
+  final String id;
   final String symbol;
   final String direction;
   final double fillPrice;
@@ -29,7 +29,7 @@ class PaperTrade {
 
   factory PaperTrade.fromJson(Map<String, dynamic> json) {
     return PaperTrade(
-      id: json['id'] as int? ?? 0,
+      id: json['id'] as String? ?? '',
       symbol: json['symbol'] as String? ?? '—',
       direction: json['direction'] as String? ?? 'buy',
       fillPrice: _d(json['fill_price']),
@@ -44,4 +44,7 @@ class PaperTrade {
   }
 }
 
-double _d(Object? value) => (value as num?)?.toDouble() ?? 0;
+double _d(Object? value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
+}

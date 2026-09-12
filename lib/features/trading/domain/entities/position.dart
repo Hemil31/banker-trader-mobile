@@ -20,7 +20,7 @@ class Position {
     required this.closedAt,
   });
 
-  final int id;
+  final String id;
   final String? symbol;
   final String status;
   final double quantity;
@@ -43,7 +43,7 @@ class Position {
 
   factory Position.fromJson(Map<String, dynamic> json) {
     return Position(
-      id: json['id'] as int? ?? 0,
+      id: json['id'] as String? ?? '',
       symbol: json['symbol'] as String?,
       status: json['status'] as String? ?? 'unknown',
       quantity: _d(json['quantity']),
@@ -65,4 +65,7 @@ class Position {
   }
 }
 
-double _d(Object? value) => (value as num?)?.toDouble() ?? 0;
+double _d(Object? value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
+}

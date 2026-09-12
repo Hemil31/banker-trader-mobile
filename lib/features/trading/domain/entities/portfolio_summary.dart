@@ -23,9 +23,18 @@ class PortfolioSummary {
       realized: _d(json['realized']),
       grossEquity: _d(json['gross_equity']),
       netEquity: _d(json['net_equity']),
-      openPositionsCount: json['open_positions_count'] as int? ?? 0,
+      openPositionsCount: _i(json['open_positions_count']),
     );
   }
 }
 
-double _d(Object? value) => (value as num?)?.toDouble() ?? 0;
+double _d(Object? value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+int _i(Object? value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
+}

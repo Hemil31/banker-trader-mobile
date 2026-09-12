@@ -21,12 +21,12 @@ class PaperRunResult {
 
   factory PaperRunResult.fromJson(Map<String, dynamic> json) {
     return PaperRunResult(
-      signalsGenerated: json['signals_generated'] as int? ?? 0,
+      signalsGenerated: _i(json['signals_generated']),
       marketOk: json['market_ok'] as bool? ?? false,
-      entered: json['entered'] as int? ?? 0,
-      blocked: json['blocked'] as int? ?? 0,
-      monitored: json['monitored'] as int? ?? 0,
-      exits: json['exits'] as int? ?? 0,
+      entered: _i(json['entered']),
+      blocked: _i(json['blocked']),
+      monitored: _i(json['monitored']),
+      exits: _i(json['exits']),
     );
   }
 }
@@ -37,4 +37,10 @@ abstract interface class TradingRepository {
   Future<List<ConfigRow>> fetchConfig();
 
   Future<PaperRunResult> runPaperSession({List<int>? symbols});
+}
+
+int _i(Object? value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
 }

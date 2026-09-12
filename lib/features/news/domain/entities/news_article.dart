@@ -37,7 +37,7 @@ class NewsArticle {
       publisher: json['publisher'] as String?,
       publishedAt: json['published_at'] as String?,
       sentiment: json['sentiment'] as String? ?? 'neutral',
-      sentimentScore: (json['sentiment_score'] as num?)?.toDouble() ?? 0,
+      sentimentScore: _d(json['sentiment_score']),
       originalUrl: json['original_url'] as String?,
       thumbnail: json['thumbnail'] as String?,
       authors: _strings(json['authors']),
@@ -51,4 +51,9 @@ List<String> _strings(Object? value) {
     return const [];
   }
   return value.whereType<String>().toList(growable: false);
+}
+
+double _d(Object? value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
 }

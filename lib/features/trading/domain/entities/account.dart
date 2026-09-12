@@ -9,7 +9,7 @@ class Account {
     required this.investedAmount,
   });
 
-  final int id;
+  final String id;
   final String name;
   final String mode;
   final double startingCapital;
@@ -18,7 +18,7 @@ class Account {
 
   factory Account.fromJson(Map<String, dynamic> json) {
     return Account(
-      id: json['id'] as int? ?? 0,
+      id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? 'Paper Trading',
       mode: json['mode'] as String? ?? 'paper',
       startingCapital: _d(json['starting_capital']),
@@ -28,4 +28,7 @@ class Account {
   }
 }
 
-double _d(Object? value) => (value as num?)?.toDouble() ?? 0;
+double _d(Object? value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
+}

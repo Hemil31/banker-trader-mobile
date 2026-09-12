@@ -37,7 +37,7 @@ class PortfolioOverview {
       recentPaperTrades: _list(
         json['recent_paper_trades'],
       ).map((e) => PaperTrade.fromJson(e)).toList(),
-      marketBars: json['market_bars'] as int? ?? 0,
+      marketBars: _i(json['market_bars']),
     );
   }
 }
@@ -47,4 +47,10 @@ List<Map<String, dynamic>> _list(Object? value) {
     return const [];
   }
   return value.whereType<Map<String, dynamic>>().toList(growable: false);
+}
+
+int _i(Object? value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
 }

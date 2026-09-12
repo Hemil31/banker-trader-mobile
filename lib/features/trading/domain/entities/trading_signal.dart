@@ -12,7 +12,7 @@ class TradingSignal {
     required this.status,
   });
 
-  final int id;
+  final String id;
   final String? symbol;
   final String? signalDate;
   final double price;
@@ -25,7 +25,7 @@ class TradingSignal {
 
   factory TradingSignal.fromJson(Map<String, dynamic> json) {
     return TradingSignal(
-      id: json['id'] as int? ?? 0,
+      id: json['id'] as String? ?? '',
       symbol: json['symbol'] as String?,
       signalDate: json['signal_date'] as String?,
       price: _d(json['price']),
@@ -39,4 +39,7 @@ class TradingSignal {
   }
 }
 
-double _d(Object? value) => (value as num?)?.toDouble() ?? 0;
+double _d(Object? value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
+}
