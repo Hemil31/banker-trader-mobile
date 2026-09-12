@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../state/auth_cubit.dart';
 import '../state/auth_state.dart';
 
@@ -13,9 +14,18 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _identifierController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _identifierController = TextEditingController(text: 'dev');
+  final _passwordController = TextEditingController(text: 'devpassword');
   bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Temp dev credentials prefilled so the app can be opened to the shell
+    // with a single tap; replace with real auth when available.
+    _identifierController.text = 'dev';
+    _passwordController.text = 'devpassword';
+  }
 
   @override
   void dispose() {
@@ -55,20 +65,13 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Image.asset('assets/images/logo.png', height: 96),
-                      const SizedBox(height: 8),
-                      Text(
-                        'BankerTrader',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
+                      const _LoginHero(),
                       const SizedBox(height: 32),
                       TextFormField(
                         controller: _identifierController,
                         autofillHints: const [AutofillHints.username],
                         decoration: const InputDecoration(
                           labelText: 'Email or username',
-                          border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.person_outline),
                         ),
                         validator: (value) =>
@@ -77,20 +80,19 @@ class _LoginPageState extends State<LoginPage> {
                             : null,
                         textInputAction: TextInputAction.next,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpace.lg),
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         autofillHints: const [AutofillHints.password],
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          border: const OutlineInputBorder(),
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
                             ),
                             onPressed: () => setState(
                               () => _obscurePassword = !_obscurePassword,
@@ -102,21 +104,49 @@ class _LoginPageState extends State<LoginPage> {
                             : null,
                         onFieldSubmitted: (_) => _submit(),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpace.xl),
                       FilledButton(
                         onPressed: isLoading ? null : _submit,
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size.fromHeight(48),
-                        ),
                         child: isLoading
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
+                                  color: Colors.white,
                                 ),
                               )
                             : const Text('Sign in'),
+                      ),
+                      const SizedBox(height: AppSpace.lg),
+                      Center(
+                        child: PopupMenuButton<String>(
+                          tooltip: 'Fill test credentials',
+                          onSelected: (value) {
+                            final split = value.split('/');
+                            _identifierController.text = split.first;
+                            _passwordController.text = split.last;
+                            setState(() => _obscurePassword = true);
+                          },
+                          itemBuilder: (context) => const [
+                            PopupMenuItem(
+                              value: 'dev/devpassword',
+                              child: Text('dev / devpassword'),
+                            ),
+                            PopupMenuItem(
+                              value: 'admin/adminpassword',
+                              child: Text('admin / adminpassword'),
+                            ),
+                          ],
+                          child: Text(
+                            'Dev: dev/devpassword · Admin: admin/adminpassword',
+                            textAlign: TextAlign.center,
+                            style: AppFonts.body(
+                              size: 11.5,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -126,6 +156,52 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       },
+    );
+  }
+}
+
+class _LoginHero extends StatelessWidget {
+  const _LoginHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 76,
+          height: 76,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: AppColors.border),
+          ),
+          padding: const EdgeInsets.all(14),
+          child: Image.asset(
+            'assets/images/logo.png',
+            errorBuilder: (_, _, _) => const Icon(
+              Icons.trending_up_rounded,
+              color: AppColors.accent,
+              size: 32,
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpace.lg),
+        Text(
+          'BankerTrader',
+          style: AppFonts.body(
+            size: 12,
+            weight: FontWeight.w700,
+            color: AppColors.accent,
+          ).copyWith(letterSpacing: 0.4),
+        ),
+        const SizedBox(height: 4),
+        Text('Welcome back', style: AppFonts.display(size: 24)),
+        const SizedBox(height: 4),
+        Text(
+          'Sign in to your paper trading desk.',
+          style: AppFonts.body(size: 13.5, color: AppColors.textMuted),
+        ),
+      ],
     );
   }
 }

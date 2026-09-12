@@ -61,7 +61,6 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
               obscureText: _obscure,
               decoration: const InputDecoration(
                 labelText: 'Current password',
-                border: OutlineInputBorder(),
               ),
               validator: (value) => value == null || value.isEmpty
                   ? 'Enter your current password'
@@ -73,7 +72,6 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
               obscureText: _obscure,
               decoration: const InputDecoration(
                 labelText: 'New password (min 8 chars)',
-                border: OutlineInputBorder(),
               ),
               validator: (value) =>
                   value == null || value.length < 8
@@ -86,7 +84,6 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
               obscureText: _obscure,
               decoration: const InputDecoration(
                 labelText: 'Confirm new password',
-                border: OutlineInputBorder(),
               ),
               validator: (value) => value != _newController.text
                   ? 'Passwords do not match'

@@ -15,6 +15,7 @@ import 'package:banker_trader/features/broker/domain/entities/broker.dart';
 import 'package:banker_trader/features/broker/domain/entities/broker_account.dart';
 import 'package:banker_trader/features/broker/domain/entities/broker_authorization.dart';
 import 'package:banker_trader/features/broker/domain/repositories/broker_repository.dart';
+import 'package:banker_trader/features/broker/domain/usecases/connect_kotak_usecase.dart';
 import 'package:banker_trader/features/broker/domain/usecases/disconnect_broker_usecase.dart';
 import 'package:banker_trader/features/broker/domain/usecases/fetch_broker_accounts_usecase.dart';
 import 'package:banker_trader/features/broker/domain/usecases/fetch_brokers_usecase.dart';
@@ -116,13 +117,22 @@ class _FakeBrokerRepository implements BrokerRepository {
   @override
   Future<String> authorizeFeed(String tradingAccountId, String type) async =>
       'wss://example.com/feed';
+
+  @override
+  Future<void> connectKotak(
+    String tradingAccountId, {
+    required String mobileNumber,
+    required String ucc,
+    required String totp,
+    required String mpin,
+  }) async {}
 }
 
 class _FakeTradingRepository implements TradingRepository {
   @override
   Future<PortfolioOverview> fetchPortfolio() async => PortfolioOverview(
     account: const Account(
-      id: 1,
+      id: 'acc-1',
       name: 'Paper Trading',
       mode: 'paper',
       startingCapital: 100000,
@@ -203,6 +213,7 @@ Widget _buildApp() {
     fetchAccounts: FetchBrokerAccountsUseCase(repository: brokerRepo),
     openAuthorization: OpenBrokerAuthorizationUseCase(repository: brokerRepo),
     disconnectBroker: DisconnectBrokerUseCase(repository: brokerRepo),
+    connectKotak: ConnectKotakUseCase(repository: brokerRepo),
   )..emit(
     BrokerLoaded(
       brokers: const [
@@ -255,7 +266,7 @@ void main() {
     expect(find.text('Trades'), findsOneWidget);
     expect(find.text('Config'), findsOneWidget);
     expect(find.text('Profile'), findsOneWidget);
-    expect(find.text('Net equity'), findsOneWidget);
+    expect(find.text('Total equity'), findsOneWidget);
   });
 
   testWidgets('news tab shows the latest headlines with sentiment', (
@@ -284,10 +295,10 @@ void main() {
 
     expect(find.text('Tester'), findsOneWidget);
     expect(find.text('t@example.com'), findsOneWidget);
+    expect(find.text('CONNECT TRADING ACCOUNT'), findsOneWidget);
     expect(find.text('Trading accounts'), findsOneWidget);
-    expect(find.text('Broker credentials'), findsOneWidget);
-    expect(find.text('Upstox'), findsWidgets);
-    expect(find.text('Connected'), findsWidgets);
+    expect(find.text('1 of 2 connected'), findsOneWidget);
+    expect(find.text('Connected'), findsOneWidget);
 
     await tester.drag(
       find.byType(ListView).hitTestable(),

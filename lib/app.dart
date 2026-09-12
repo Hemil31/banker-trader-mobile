@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/di/injection.dart';
+import 'core/theme/app_theme.dart';
 import 'features/authentication/presentation/pages/login_page.dart';
 import 'features/authentication/presentation/state/auth_cubit.dart';
 import 'features/authentication/presentation/state/auth_state.dart';
@@ -27,10 +28,7 @@ class BankerTraderApp extends StatelessWidget {
       child: MaterialApp(
         title: 'BankerTrader',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0D1B2A)),
-          useMaterial3: true,
-        ),
+        theme: buildAppTheme(),
         home: const _AuthGate(),
       ),
     );

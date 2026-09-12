@@ -32,4 +32,19 @@ class BrokerRepositoryImpl implements BrokerRepository {
   @override
   Future<String> authorizeFeed(String tradingAccountId, String type) =>
       _api.authorizeFeed(tradingAccountId, type);
+
+  @override
+  Future<void> connectKotak(
+    String tradingAccountId, {
+    required String mobileNumber,
+    required String ucc,
+    required String totp,
+    required String mpin,
+  }) => _api.kotakConnect(
+    tradingAccountId,
+    mobileNumber: mobileNumber,
+    ucc: ucc,
+    totp: totp,
+    mpin: mpin,
+  );
 }

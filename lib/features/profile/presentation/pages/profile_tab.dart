@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../authentication/domain/entities/user.dart';
 import '../../../authentication/presentation/state/auth_cubit.dart';
 import '../../../authentication/presentation/state/auth_state.dart';
-import '../../../broker/domain/entities/broker.dart';
 import '../../../broker/domain/entities/broker_account.dart';
 import '../../../broker/presentation/pages/broker_connect_page.dart';
 import '../../../broker/presentation/state/broker_cubit.dart';
@@ -83,52 +83,43 @@ class _ProfileTabState extends State<ProfileTab> {
     );
 
     return RefreshIndicator(
+      color: AppColors.accent,
       onRefresh: () async {
         await context.read<BrokerCubit>().load();
       },
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpace.lg),
         children: [
           if (user != null) _UserHeader(user: user),
-          const SizedBox(height: 20),
-          Text('Trading accounts', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          const _AccountsSection(),
-          const SizedBox(height: 20),
-          Text('Broker credentials', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          const _BrokersSection(),
-          const SizedBox(height: 20),
-          Text('Account', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpace.xl),
+          SectionLabel('Connect trading account'),
+          const _TradingAccountSection(),
+          const SizedBox(height: AppSpace.lg),
+          SectionLabel('Account'),
           Card(
             child: Column(
               children: [
-                ListTile(
-                  leading: const Icon(Icons.lock_outline),
-                  title: const Text('Change password'),
-                  trailing: const Icon(Icons.chevron_right),
+                _SettingsRow(
+                  icon: Icons.lock_outline,
+                  label: 'Change password',
                   onTap: _changePassword,
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: const Text('About'),
-                  trailing: const Icon(Icons.chevron_right),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _SettingsRow(
+                  icon: Icons.info_outline,
+                  label: 'About',
                   onTap: _showAbout,
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpace.lg),
           Card(
-            child: ListTile(
-              leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
-              title: Text(
-                'Sign out',
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
+            child: _SettingsRow(
+              icon: Icons.logout,
+              label: 'Sign out',
+              color: AppColors.negative,
               onTap: _confirmSignOut,
             ),
           ),
@@ -147,27 +138,33 @@ class _UserHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpace.lg),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 28,
+            Container(
+              width: 56,
+              height: 56,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                color: AppColors.accentSoft,
+                shape: BoxShape.circle,
+              ),
               child: Text(
                 _initials(user.name),
-                style: Theme.of(context).textTheme.titleLarge,
+                style: AppFonts.display(size: 18, color: AppColors.accent),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSpace.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user.name, style: Theme.of(context).textTheme.titleLarge),
+                  Text(user.name, style: AppFonts.body(size: 15, weight: FontWeight.w700)),
                   const SizedBox(height: 2),
-                  Text(user.email, style: Theme.of(context).textTheme.bodySmall),
+                  Text(user.email, style: AppFonts.body(size: 12, color: AppColors.textMuted)),
                   Text(
                     '@${user.username}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: AppFonts.body(size: 12, color: AppColors.textMuted),
                   ),
                 ],
               ),
@@ -186,166 +183,110 @@ class _UserHeader extends StatelessWidget {
   }
 }
 
-class _AccountsSection extends StatelessWidget {
-  const _AccountsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<BrokerCubit, BrokerState>(
-      builder: (context, state) {
-        return switch (state) {
-          BrokerInitial() || BrokerLoading() => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: CircularProgressIndicator(),
-            ),
-          ),
-          BrokerError() => EmptyHint(state.message),
-          BrokerLoaded() => _accounts(context, state.accounts),
-        };
-      },
-    );
-  }
-
-  Widget _accounts(BuildContext context, List<BrokerAccount> accounts) {
-    if (accounts.isEmpty) {
-      return const EmptyHint('No trading accounts yet.');
-    }
-    return Column(
-      children: accounts
-          .map(
-            (account) => Card(
-              child: ListTile(
-                leading: Icon(
-                  account.connected ? Icons.account_balance_wallet : Icons.account_balance_wallet_outlined,
-                  color: account.connected
-                      ? Colors.green.shade700
-                      : Theme.of(context).colorScheme.outline,
-                ),
-                title: Text(account.name),
-                subtitle: Text(
-                  account.connected
-                      ? '${account.broker?.name ?? 'Live'} · live'
-                      : 'Paper mode',
-                ),
-                trailing: Text(
-                  account.connected ? 'Connected' : 'Not connected',
-                  style: TextStyle(
-                    color: account.connected
-                        ? Colors.green.shade700
-                        : Theme.of(context).colorScheme.outline,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                onTap: () => _openBrokerSettings(context),
-              ),
-            ),
-          )
-          .toList(growable: false),
-    );
-  }
-
-  void _openBrokerSettings(BuildContext context) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const BrokerConnectPage()),
-    );
-    if (context.mounted) {
-      context.read<BrokerCubit>().load();
-    }
-  }
-}
-
-class _BrokersSection extends StatelessWidget {
-  const _BrokersSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<BrokerCubit, BrokerState>(
-      builder: (context, state) {
-        return switch (state) {
-          BrokerInitial() || BrokerLoading() => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: CircularProgressIndicator(),
-            ),
-          ),
-          BrokerError() => EmptyHint(state.message),
-          BrokerLoaded() => _brokers(context, state),
-        };
-      },
-    );
-  }
-
-  Widget _brokers(BuildContext context, BrokerLoaded state) {
-    final liveBrokers = state.brokers.where((b) => b.isLive).toList();
-    final connectedSlugs = state.accounts
-        .where((a) => a.connected)
-        .map((a) => a.broker?.slug)
-        .whereType<String>()
-        .toSet();
-
-    if (liveBrokers.isEmpty) {
-      return const EmptyHint('No live brokers available.');
-    }
-
-    return Column(
-      children: liveBrokers
-          .map(
-            (broker) => _BrokerRow(
-              broker: broker,
-              connected: connectedSlugs.contains(broker.slug),
-              onTap: () => _openBrokerSettings(context),
-            ),
-          )
-          .toList(growable: false),
-    );
-  }
-
-  void _openBrokerSettings(BuildContext context) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const BrokerConnectPage()),
-    );
-    if (context.mounted) {
-      context.read<BrokerCubit>().load();
-    }
-  }
-}
-
-class _BrokerRow extends StatelessWidget {
-  const _BrokerRow({
-    required this.broker,
-    required this.connected,
+class _SettingsRow extends StatelessWidget {
+  const _SettingsRow({
+    required this.icon,
+    required this.label,
     required this.onTap,
+    this.color,
   });
 
-  final Broker broker;
-  final bool connected;
+  final IconData icon;
+  final String label;
   final VoidCallback onTap;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: const Icon(Icons.trending_up),
-        title: Text(broker.name),
-        subtitle: Text(connected ? 'Connected to an account' : 'Not connected'),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpace.lg,
+          vertical: AppSpace.md,
+        ),
+        child: Row(
           children: [
-            Text(
-              connected ? 'Connected' : 'Connect',
-              style: TextStyle(
-                color: connected
-                    ? Colors.green.shade700
-                    : Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w600,
+            Icon(icon, size: 20, color: color ?? AppColors.textMuted),
+            const SizedBox(width: AppSpace.md),
+            Expanded(
+              child: Text(
+                label,
+                style: AppFonts.body(
+                  size: 13.5,
+                  weight: FontWeight.w600,
+                  color: color ?? AppColors.textPrimary,
+                ),
               ),
             ),
-            const Icon(Icons.chevron_right),
+            Icon(Icons.chevron_right, color: AppColors.textMuted, size: 20),
           ],
         ),
-        onTap: onTap,
       ),
     );
+  }
+}
+
+/// Single entry point for trading accounts + broker connections. Tapping it
+/// opens [BrokerConnectPage], where each account has its own broker dropdown
+/// and connect/disconnect actions — this row is just an at-a-glance summary.
+class _TradingAccountSection extends StatelessWidget {
+  const _TradingAccountSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<BrokerCubit, BrokerState>(
+      builder: (context, state) {
+        return switch (state) {
+          BrokerInitial() || BrokerLoading() => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(color: AppColors.accent),
+            ),
+          ),
+          BrokerError() => EmptyHint(state.message),
+          BrokerLoaded() => _summary(context, state.accounts),
+        };
+      },
+    );
+  }
+
+  Widget _summary(BuildContext context, List<BrokerAccount> accounts) {
+    if (accounts.isEmpty) {
+      return const EmptyHint(
+        'No trading accounts yet.',
+        icon: Icons.account_balance_wallet_outlined,
+      );
+    }
+
+    final connected = accounts.where((a) => a.connected).toList();
+    final title = accounts.length == 1 ? accounts.first.name : 'Trading accounts';
+    final String caption;
+    if (accounts.length == 1) {
+      caption = connected.isEmpty
+          ? 'Paper mode'
+          : '${connected.first.broker?.name ?? 'Live'} · live';
+    } else {
+      caption = '${connected.length} of ${accounts.length} connected';
+    }
+
+    return RowCard(
+      title: title,
+      caption: caption,
+      trailing: connected.isEmpty
+          ? PillBadge.neutral('Not connected', dense: true)
+          : PillBadge.positive('Connected', dense: true),
+      onTap: () => _openBrokerSettings(context),
+    );
+  }
+
+  void _openBrokerSettings(BuildContext context) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const BrokerConnectPage()),
+    );
+    if (context.mounted) {
+      context.read<BrokerCubit>().load();
+    }
   }
 }

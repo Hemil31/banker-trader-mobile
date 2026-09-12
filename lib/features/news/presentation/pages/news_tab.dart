@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../trading/presentation/widgets/common_widgets.dart';
 import '../../domain/entities/news_article.dart';
 import '../state/news_cubit.dart';
@@ -20,25 +21,31 @@ class NewsTab extends StatelessWidget {
       builder: (context, state) {
         return switch (state) {
           NewsInitial() => const SizedBox.shrink(),
-          NewsLoading() => const Center(child: CircularProgressIndicator()),
+          NewsLoading() => const Center(
+            child: CircularProgressIndicator(color: AppColors.accent),
+          ),
           NewsError() => ErrorView(
             message: state.message,
             onRetry: () => context.read<NewsCubit>().load(),
           ),
           NewsLoaded() => RefreshIndicator(
+            color: AppColors.accent,
             onRefresh: onRefresh,
             child: state.articles.isEmpty
                 ? ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     children: const [
-                      EmptyHint('No news yet — check back soon.'),
+                      EmptyHint(
+                        'No news yet — check back soon.',
+                        icon: Icons.newspaper_outlined,
+                      ),
                     ],
                   )
                 : ListView.separated(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpace.lg),
                     itemCount: state.articles.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    separatorBuilder: (_, _) => const SizedBox(height: AppSpace.sm),
                     itemBuilder: (context, index) =>
                         _NewsCard(article: state.articles[index]),
                   ),
@@ -56,12 +63,11 @@ class _NewsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final sentimentColor = article.isPositive
-        ? Colors.green.shade700
+    final sentimentPill = article.isPositive
+        ? PillBadge.positive(article.sentiment, dense: true)
         : article.isNegative
-        ? Colors.red.shade700
-        : Colors.blueGrey;
+        ? PillBadge.negative(article.sentiment, dense: true)
+        : PillBadge.neutral(article.sentiment, dense: true);
 
     return Card(
       margin: EdgeInsets.zero,
@@ -78,12 +84,12 @@ class _NewsCard extends StatelessWidget {
               ),
             ),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpace.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _Thumb(article: article),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpace.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,9 +98,7 @@ class _NewsCard extends StatelessWidget {
                       article.title,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppFonts.body(size: 13.5, weight: FontWeight.w600),
                     ),
                     const SizedBox(height: 6),
                     Wrap(
@@ -104,29 +108,26 @@ class _NewsCard extends StatelessWidget {
                         if (article.symbol != null)
                           Text(
                             article.symbol!,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
+                            style: AppFonts.body(
+                              size: 11,
+                              weight: FontWeight.w700,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         if (article.publisher != null &&
                             article.publisher!.isNotEmpty)
                           Text(
                             article.publisher!,
-                            style: theme.textTheme.bodySmall,
+                            style: AppFonts.body(size: 11, color: AppColors.textMuted),
                           ),
                         Text(
                           _relativeTime(article.publishedAt),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.outline,
-                          ),
+                          style: AppFonts.body(size: 11, color: AppColors.textMuted),
                         ),
                       ],
                     ),
                     const SizedBox(height: 6),
-                    _SentimentChip(
-                      label: article.sentiment,
-                      color: sentimentColor,
-                    ),
+                    sentimentPill,
                   ],
                 ),
               ),
@@ -148,7 +149,7 @@ class _Thumb extends StatelessWidget {
     final url = article.thumbnail;
     if (url != null && url.isNotEmpty) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
         child: Image.network(
           url,
           width: 56,
@@ -172,34 +173,13 @@ class _ThumbFallback extends StatelessWidget {
       height: 56,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
-      child: const Icon(Icons.article_outlined, size: 28),
-    );
-  }
-}
-
-class _SentimentChip extends StatelessWidget {
-  const _SentimentChip({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
+      child: const Icon(
+        Icons.article_outlined,
+        size: 26,
+        color: AppColors.textMuted,
       ),
     );
   }

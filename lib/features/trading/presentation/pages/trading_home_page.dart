@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../broker/presentation/state/broker_cubit.dart';
 import '../../../news/presentation/pages/news_tab.dart';
 import '../../../news/presentation/state/news_cubit.dart';
@@ -68,8 +69,12 @@ class _TradingHomePageState extends State<TradingHomePage> {
         title: Text(_titles[_index]),
         actions: [
           if (_index == 0) ...[
-            IconButton(
+            IconButton.filled(
               tooltip: 'Run paper session',
+              style: IconButton.styleFrom(
+                backgroundColor: AppColors.accentSoft,
+                foregroundColor: AppColors.accent,
+              ),
               onPressed: running
                   ? null
                   : () => context.read<TradingCubit>().runSession(),
@@ -77,15 +82,20 @@ class _TradingHomePageState extends State<TradingHomePage> {
                   ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.accent,
+                      ),
                     )
-                  : const Icon(Icons.play_circle_outline),
+                  : const Icon(Icons.play_arrow_rounded),
             ),
+            const SizedBox(width: AppSpace.sm),
             IconButton(
               tooltip: 'Profile',
-              onPressed: () => _selectTab(4),
+              onPressed: () => _selectTab(5),
               icon: const Icon(Icons.person_outline),
             ),
+            const SizedBox(width: AppSpace.sm),
           ],
         ],
       ),
@@ -129,41 +139,60 @@ class _TradingHomePageState extends State<TradingHomePage> {
           };
         },
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: _selectTab,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.textPrimary.withValues(alpha: 0.06),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.newspaper_outlined),
-            selectedIcon: Icon(Icons.newspaper),
-            label: 'News',
+          clipBehavior: Clip.antiAlias,
+          child: NavigationBar(
+            selectedIndex: _index,
+            onDestinationSelected: _selectTab,
+            height: 64,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.newspaper_outlined),
+                selectedIcon: Icon(Icons.newspaper),
+                label: 'News',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.query_stats_outlined),
+                selectedIcon: Icon(Icons.query_stats),
+                label: 'Signals',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.receipt_long_outlined),
+                selectedIcon: Icon(Icons.receipt_long),
+                label: 'Trades',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.tune_outlined),
+                selectedIcon: Icon(Icons.tune),
+                label: 'Config',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline),
+                selectedIcon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.query_stats_outlined),
-            selectedIcon: Icon(Icons.query_stats),
-            label: 'Signals',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
-            label: 'Trades',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.tune_outlined),
-            selectedIcon: Icon(Icons.tune),
-            label: 'Config',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+        ),
       ),
     );
   }

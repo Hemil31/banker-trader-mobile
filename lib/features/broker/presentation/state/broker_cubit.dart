@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/broker.dart';
+import '../../domain/usecases/connect_kotak_usecase.dart';
 import '../../domain/usecases/disconnect_broker_usecase.dart';
 import '../../domain/usecases/fetch_broker_accounts_usecase.dart';
 import '../../domain/usecases/fetch_brokers_usecase.dart';
@@ -16,16 +18,19 @@ class BrokerCubit extends Cubit<BrokerState> {
     required FetchBrokerAccountsUseCase fetchAccounts,
     required OpenBrokerAuthorizationUseCase openAuthorization,
     required DisconnectBrokerUseCase disconnectBroker,
+    required ConnectKotakUseCase connectKotak,
   }) : _fetchBrokers = fetchBrokers,
        _fetchAccounts = fetchAccounts,
        _openAuthorization = openAuthorization,
        _disconnectBroker = disconnectBroker,
+       _connectKotak = connectKotak,
        super(const BrokerInitial());
 
   final FetchBrokersUseCase _fetchBrokers;
   final FetchBrokerAccountsUseCase _fetchAccounts;
   final OpenBrokerAuthorizationUseCase _openAuthorization;
   final DisconnectBrokerUseCase _disconnectBroker;
+  final ConnectKotakUseCase _connectKotak;
 
   Future<void> load() async {
     emit(const BrokerLoading());
@@ -67,6 +72,30 @@ class BrokerCubit extends Cubit<BrokerState> {
     }
   }
 
+  /// Connects Kotak Neo with direct credentials. Rethrows a clean message on
+  /// failure (wrong TOTP, wrong MPIN, ...) so the credentials form can show
+  /// it inline and let the user retry, instead of only a transient snackbar.
+  Future<void> connectKotak(
+    String tradingAccountId, {
+    required String mobileNumber,
+    required String ucc,
+    required String totp,
+    required String mpin,
+  }) async {
+    try {
+      await _connectKotak(
+        tradingAccountId,
+        mobileNumber: mobileNumber,
+        ucc: ucc,
+        totp: totp,
+        mpin: mpin,
+      );
+    } catch (error) {
+      throw Exception(_message(error));
+    }
+    await _refreshAccounts('Kotak connected successfully.');
+  }
+
   Future<void> _refreshAccounts([String? message]) async {
     final current = state;
     if (current is! BrokerLoaded) {
@@ -96,5 +125,23 @@ class BrokerCubit extends Cubit<BrokerState> {
     }
   }
 
-  String _message(Object error) => error.toString().split(':').last.trim();
+  String _message(Object error) {
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map) {
+        final message = data['message'];
+        if (message is String && message.isNotEmpty) {
+          return message;
+        }
+        final errors = data['errors'];
+        if (errors is Map && errors.isNotEmpty) {
+          final first = errors.values.first;
+          if (first is List && first.isNotEmpty) {
+            return first.first.toString();
+          }
+        }
+      }
+    }
+    return error.toString().split(':').last.trim();
+  }
 }

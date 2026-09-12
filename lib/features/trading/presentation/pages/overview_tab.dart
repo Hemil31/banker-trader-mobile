@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/portfolio_overview.dart';
 import '../state/trading_state.dart';
 import '../widgets/common_widgets.dart';
@@ -17,18 +18,16 @@ class OverviewTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
+      color: AppColors.accent,
       onRefresh: onRefresh,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpace.lg),
         children: [
           if (state.sessionMessage != null)
             Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                state.sessionMessage!,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              padding: const EdgeInsets.only(bottom: AppSpace.md),
+              child: PillBadge.neutral(state.sessionMessage!),
             ),
           _OverviewBody(overview: state.overview),
         ],
@@ -45,30 +44,48 @@ class _OverviewBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final o = overview;
+    final isPaper = o.account.mode != 'live';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        PillBadge(
+          label: isPaper ? 'PAPER ACCOUNT' : 'LIVE ACCOUNT · ${o.account.name}',
+          foreground: isPaper ? AppColors.warning : AppColors.info,
+          background: isPaper ? AppColors.warningSoft : AppColors.infoSoft,
+        ),
+        const SizedBox(height: AppSpace.md),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpace.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Total equity',
+                  style: AppFonts.body(size: 12, color: AppColors.textMuted),
+                ),
+                const SizedBox(height: 6),
+                Text(inr(o.portfolio.netEquity), style: AppFonts.display(size: 32)),
+                const SizedBox(height: 6),
+                Text(
+                  'Started ${inr(o.account.startingCapital)}',
+                  style: AppFonts.body(size: 12.5, color: AppColors.textMuted),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpace.md),
         Row(
           children: [
-            Expanded(
-              child: StatCard(
-                label: 'Net equity',
-                value: inr(o.portfolio.netEquity),
-                sub: 'Started ${inr(o.account.startingCapital)}',
-              ),
-            ),
-            const SizedBox(width: 8),
             Expanded(
               child: StatCard(
                 label: 'Available cash',
                 value: inr(o.account.availableCash),
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
+            const SizedBox(width: AppSpace.sm),
             Expanded(
               child: StatCard(
                 label: 'Invested',
@@ -76,31 +93,30 @@ class _OverviewBody extends StatelessWidget {
                 sub: '${o.portfolio.openPositionsCount} open',
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: StatCard(
-                label: 'Unrealized',
-                value: inr(o.portfolio.unrealized),
-                sub: '${o.marketBars} bars',
-                valueColor: o.portfolio.unrealized >= 0
-                    ? Colors.green.shade700
-                    : Colors.red.shade700,
-              ),
-            ),
           ],
         ),
-        const SizedBox(height: 20),
-        Text('Open positions', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
+        StatCard(
+          label: 'Unrealized P&L',
+          value: inr(o.portfolio.unrealized),
+          sub: '${o.marketBars} market bars tracked',
+          valueColor: o.portfolio.unrealized >= 0
+              ? AppColors.positive
+              : AppColors.negative,
+        ),
+        const SizedBox(height: AppSpace.xl),
+        SectionLabel('Open positions'),
         if (o.openPositions.isEmpty)
-          const EmptyHint('No open positions — run a paper session.')
+          const EmptyHint(
+            'No open positions — run a paper session.',
+            icon: Icons.candlestick_chart_outlined,
+          )
         else
           ...o.openPositions.map((p) => PositionTile(position: p)),
-        const SizedBox(height: 20),
-        Text('Recent signals', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.lg),
+        SectionLabel('Recent signals'),
         if (o.recentSignals.isEmpty)
-          const EmptyHint('No signals yet.')
+          const EmptyHint('No signals yet.', icon: Icons.query_stats_outlined)
         else
           ...o.recentSignals.take(5).map((s) => SignalTile(signal: s)),
       ],

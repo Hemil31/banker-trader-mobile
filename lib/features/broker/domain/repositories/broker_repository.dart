@@ -16,4 +16,14 @@ abstract class BrokerRepository {
   Future<void> disconnect(String tradingAccountId);
 
   Future<String> authorizeFeed(String tradingAccountId, String type);
+
+  /// Connects a Kotak Neo account directly with credentials (mobile/UCC/TOTP
+  /// then MPIN) instead of the OAuth redirect other brokers use.
+  Future<void> connectKotak(
+    String tradingAccountId, {
+    required String mobileNumber,
+    required String ucc,
+    required String totp,
+    required String mpin,
+  });
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../../../../core/theme/app_theme.dart';
+
 /// In-app reader for a news article's original URL. Reuses the WebView that
 /// is already a dependency (broker OAuth), so no extra package is needed.
 class ArticleWebViewPage extends StatefulWidget {
@@ -36,7 +38,9 @@ class _ArticleWebViewPageState extends State<ArticleWebViewPage> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.accent),
+            )
           : WebViewWidget(controller: _controller),
     );
   }

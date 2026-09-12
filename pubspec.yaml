@@ -41,6 +41,7 @@ dependencies:
   webview_flutter: ^4.13.1
   web_socket_channel: ^3.0.3
   uuid: ^4.5.1
+  google_fonts: ^8.2.1
 
 dev_dependencies:
   flutter_test:
@@ -59,14 +60,14 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 flutter_native_splash:
-  color: "#0D1B2A"
+  color: "#F3F1EC"
   image: assets/images/splash.png
-  color_dark: "#0D1B2A"
+  color_dark: "#F3F1EC"
   image_dark: assets/images/splash.png
   android_12:
-    color: "#0D1B2A"
+    color: "#F3F1EC"
     image: assets/images/splash.png
-    color_dark: "#0D1B2A"
+    color_dark: "#F3F1EC"
     image_dark: assets/images/splash.png
 
 flutter_launcher_icons:

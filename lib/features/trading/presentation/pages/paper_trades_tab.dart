@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/paper_trade.dart';
 import '../widgets/common_widgets.dart';
 
@@ -19,43 +20,46 @@ class PaperTradesTab extends StatelessWidget {
     final total = closed.fold<double>(0, (sum, t) => sum + t.pnlNet);
 
     return RefreshIndicator(
+      color: AppColors.accent,
       onRefresh: onRefresh,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpace.lg),
         children: [
           if (trades.isEmpty)
-            const EmptyHint('No paper trades yet.')
+            const EmptyHint(
+              'No paper trades yet.',
+              icon: Icons.receipt_long_outlined,
+            )
           else ...[
             if (closed.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  'Realized P&L: ${inr(total)}',
-                  style: Theme.of(context).textTheme.titleMedium,
+              Card(
+                margin: const EdgeInsets.only(bottom: AppSpace.lg),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpace.lg),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Realized P&L · ${closed.length} closed',
+                        style: AppFonts.body(size: 13, color: AppColors.textMuted),
+                      ),
+                      Text(
+                        inr(total),
+                        style: AppFonts.display(
+                          size: 18,
+                          color: total >= 0
+                              ? AppColors.positive
+                              : AppColors.negative,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ...trades.map(_tradeCard),
+            ...trades.map((t) => TradeTile(trade: t)),
           ],
         ],
-      ),
-    );
-  }
-
-  Widget _tradeCard(PaperTrade trade) {
-    final color = trade.pnlNet >= 0 ? Colors.green.shade700 : Colors.red.shade700;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        title: Text(trade.symbol),
-        subtitle: Text(
-          'fill ${inr(trade.fillPrice)} · qty ${trade.quantity} · '
-          '${trade.status}${trade.exitReason != null ? ' · ${trade.exitReason}' : ''}',
-        ),
-        trailing: Text(
-          inr(trade.pnlNet),
-          style: TextStyle(color: color, fontWeight: FontWeight.w600),
-        ),
       ),
     );
   }

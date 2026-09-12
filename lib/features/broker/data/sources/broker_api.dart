@@ -48,6 +48,28 @@ class BrokerApi {
     await dio.delete('$baseUrl/api/broker/disconnect/$tradingAccountId');
   }
 
+  /// Connects a Kotak Neo account directly with credentials (no OAuth
+  /// redirect): the backend logs in with [mobileNumber]/[ucc]/[totp], then
+  /// validates the session with [mpin], in one round trip.
+  Future<void> kotakConnect(
+    String tradingAccountId, {
+    required String mobileNumber,
+    required String ucc,
+    required String totp,
+    required String mpin,
+  }) async {
+    await dio.post(
+      '$baseUrl/api/broker/connect/$tradingAccountId/kotak',
+      data: {
+        'mobile_number': mobileNumber,
+        'ucc': ucc,
+        'totp': totp,
+        'mpin': mpin,
+      },
+      options: Options(contentType: Headers.jsonContentType),
+    );
+  }
+
   Future<String> authorizeFeed(String tradingAccountId, String type) async {
     final response = await dio.get(
       '$baseUrl/api/broker/feed/$tradingAccountId/$type',
